@@ -12,29 +12,45 @@ class App extends Component {
       'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json'
     ];
     const data = await Promise.all(JSON_URLS.map(URL => fetch(URL).then(res => res.json())));
-    this.drawMap({ edData: data[0], coData: data[1] });
+    setInterval(() => this.drawMap({ edData: data[0], coData: data[1] }), 1000);
   }
 
   drawMap({ edData, coData }) {
-    const height = 600;
+    d3.select("svg").remove();
+    const height = 900;
     const width = 1200;
-    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+    const margin = { top: 100, right: 120, bottom: 150, left: 120 };
     const geojson = topojson.feature(coData, coData.objects.counties);
-  
     const svg = d3.select('#graph')
                   .append('svg')
                   .attrs({ 
                     height, 
-                    width 
-    
+                    width,
                   });
-                
-    svg.selectAll('path')
+    /*
+    svg.append('rect')
+       .attrs({
+         id: 'border',
+         height,
+         width,
+         fill: 'none',
+         stroke: 'red',
+         'stroke-width': 5
+       });
+    */                
+    svg.append('g')
+       .attrs({
+         id: 'map',
+         transform: `translate(${margin.left}, ${margin.top})`,
+       })
+       .selectAll('path')
        .data(geojson.features)
        .enter()
        .append('path')
-       .attr('d', d3.geoPath())
-    
+       .attrs({
+         d: d3.geoPath(),
+         fill: () => '#' + Math.random().toString(16).slice(-6)
+       }); 
   }
 
 
