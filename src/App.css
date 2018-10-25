@@ -1,0 +1,11 @@
+#tooltip {
+  white-space: pre-wrap;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  background: white;
+  border: 1px solid black;
+  border-radius: .25em;
+  padding: .25em;
+  text-align: center;
+}

@@ -15,19 +15,27 @@ class App extends Component {
   }
 
   drawMap = (edData, coData) => {
-    d3.select('svg').remove();
     const height = 900;
     const width = 1200;
     const margin = {
       top: 100, right: 120, bottom: 150, left: 120,
     };
     const geojson = topojson.feature(coData, coData.objects.counties);
+
+    function coEdDataFinder(d) {
+      return edData.filter(co => co.fips === d.id)[0];
+    }
+
     const svg = d3.select('#graph')
       .append('svg')
       .attrs({
         height,
         width,
       });
+
+    const tooltip = d3.select('#graph')
+      .append('div')
+      .attr('id', 'tooltip');
     /*
     svg.append('rect')
        .attrs({
@@ -51,8 +59,20 @@ class App extends Component {
       .attrs({
         class: 'country',
         d: d3.geoPath(),
-        'data-education': d => edData.filter(co => co.fips === d.id)[0].bachelorsOrHigher,
+        'data-fips': d => d.id,
+        'data-education': d => coEdDataFinder(d).bachelorsOrHigher,
 
+      })
+      .on('mouseover', (d) => {
+        const { state, area_name: areaName, bachelorsOrHigher } = coEdDataFinder(d);
+        tooltip.text(`${areaName}, ${state}\n${bachelorsOrHigher}%`)
+          .attr('data-year', d.year)
+          .style('visibility', 'visible')
+          .style('top', `${d3.event.target.getBoundingClientRect().top - 60}px`)
+          .style('left', `${d3.event.target.getBoundingClientRect().left - 60}px`);
+      })
+      .on('mouseout', () => {
+        tooltip.style('visibility', 'hidden');
       });
   }
 
