@@ -50,6 +50,7 @@ class App extends Component {
        .attrs({
          class: 'country',
          d: d3.geoPath(),
+         'data-education': d => edData.filter(co => co.fips === d.id)[0].bachelorsOrHigher
          
        }); 
   }
