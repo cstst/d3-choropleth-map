@@ -61,14 +61,13 @@ class App extends Component {
         d: d3.geoPath(),
         'data-fips': d => d.id,
         'data-education': d => coEdDataFinder(d).bachelorsOrHigher,
-
       })
       .on('mouseover', (d) => {
         const { state, area_name: areaName, bachelorsOrHigher } = coEdDataFinder(d);
         tooltip.text(`${areaName}, ${state}\n${bachelorsOrHigher}%`)
           .attr('data-year', d.year)
           .style('visibility', 'visible')
-          .style('top', `${d3.event.target.getBoundingClientRect().top - 60}px`)
+          .style('top', `${d3.event.target.getBoundingClientRect().top - 60 + window.pageYOffset}px`)
           .style('left', `${d3.event.target.getBoundingClientRect().left - 60}px`);
       })
       .on('mouseout', () => {
