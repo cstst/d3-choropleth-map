@@ -30,7 +30,7 @@ class App extends Component {
       d3.max(edData.map(co => co.bachelorsOrHigher))
     ];
 
-    const countyEdData = d => edData.filter(co => co.fips === d.id)[0];
+    const countyEdData = d => edData.find(co => co.fips === d.id);
 
     const colors = [
       'hsl(200, 60%, 90%)',
