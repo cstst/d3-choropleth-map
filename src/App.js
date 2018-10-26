@@ -26,16 +26,29 @@ class App extends Component {
 
     const geojson = topojson.feature(coData, coData.objects.counties);
 
-    const coEdDataFinder = d => edData.filter(co => co.fips === d.id)[0];
+    const countyEdData = d => edData.filter(co => co.fips === d.id)[0];
+
+    const colorDomain = [
+      d3.min(edData.map(co => co.bachelorsOrHigher)),
+      d3.max(edData.map(co => co.bachelorsOrHigher))
+    ];
 
     const colors = [
-      'hsl(0, 50%, 50%)',
-      'hsl(0, 50%, 50%)',
-      'hsl(0, 50%, 50%)',
-      'hsl(0, 50%, 50%)',
-      'hsl(0, 50%, 50%)',
-      'hsl(0, 50%, 50%)'
+      'hsl(200, 60%, 90%)',
+      'hsl(200, 60%, 80%)',
+      'hsl(200, 60%, 70%)',
+      'hsl(200, 60%, 60%)',
+      'hsl(200, 60%, 50%)',
+      'hsl(200, 60%, 40%)',
+      'hsl(200, 60%, 30%)',
+      'hsl(200, 60%, 20%)',
+      'hsl(200, 60%, 10%)'
     ];
+
+    const colorScale = d3
+      .scaleQuantize()
+      .domain(colorDomain)
+      .range(colors);
 
     const svg = d3
       .select('#graph')
@@ -63,12 +76,12 @@ class App extends Component {
       .attrs({
         class: 'country',
         d: d3.geoPath(),
+        fill: d => colorScale(countyEdData(d).bachelorsOrHigher),
         'data-fips': d => d.id,
-        'data-education': d => coEdDataFinder(d).bachelorsOrHigher,
-        fill: 'blue'
+        'data-education': d => countyEdData(d).bachelorsOrHigher
       })
       .on('mouseover', d => {
-        const { state, area_name: areaName, bachelorsOrHigher } = coEdDataFinder(d);
+        const { state, area_name: areaName, bachelorsOrHigher } = countyEdData(d);
         tooltip
           .text(`${areaName}, ${state}\n${bachelorsOrHigher}%`)
           .attr('data-year', d.year)
@@ -81,6 +94,23 @@ class App extends Component {
       })
       .on('mouseout', () => {
         tooltip.style('visibility', 'hidden');
+      });
+
+    svg
+      .append('g')
+      .attrs({
+        id: 'legend'
+      })
+      .selectAll('rect')
+      .data(colors)
+      .enter()
+      .append('rect')
+      .attrs({
+        class: 'legend-cell',
+        height: 50,
+        width: 50,
+        x: (d, i) => 50 * i,
+        fill: d => d
       });
   };
 
