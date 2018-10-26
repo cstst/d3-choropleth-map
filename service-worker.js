@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/d3-choropleth-map/precache-manifest.c1520c1c23dce1a11e9b97313bb76245.js"
+  "/d3-choropleth-map/precache-manifest.8ba18917abfd9f7165479e9636e34bed.js"
 );
 
 workbox.clientsClaim();
