@@ -15,6 +15,7 @@ class App extends Component {
   }
 
   drawMap = (edData, coData) => {
+    console.log(coData);
     const height = 900;
     const width = 1200;
     const margin = {
@@ -74,7 +75,7 @@ class App extends Component {
       .enter()
       .append('path')
       .attrs({
-        class: 'country',
+        class: 'county',
         d: d3.geoPath(),
         fill: d => colorScale(countyEdData(d).bachelorsOrHigher),
         'data-fips': d => d.id,
@@ -99,7 +100,8 @@ class App extends Component {
     svg
       .append('g')
       .attrs({
-        id: 'legend'
+        id: 'legend',
+        transform: 'translate(710, 150)'
       })
       .selectAll('rect')
       .data(colors)
@@ -107,9 +109,9 @@ class App extends Component {
       .append('rect')
       .attrs({
         class: 'legend-cell',
-        height: 50,
-        width: 50,
-        x: (d, i) => 50 * i,
+        height: 15,
+        width: 30,
+        x: (d, i) => 30 * i,
         fill: d => d
       });
   };

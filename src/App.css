@@ -5,7 +5,12 @@
   visibility: hidden;
   background: white;
   border: 1px solid black;
-  border-radius: .25em;
-  padding: .25em;
+  border-radius: 0.25em;
+  padding: 0.25em;
   text-align: center;
+}
+
+.county:hover {
+  stroke: black;
+  stroke-width: 1;
 }
