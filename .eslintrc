@@ -8,6 +8,7 @@
   "rules": {
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "linebreak-style": ["error", "windows"],
-    "prettier/prettier": ["error"]
+    "prettier/prettier": ["error"],
+    "func-names": ["error", "never"]
   }
 }

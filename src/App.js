@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import 'd3-selection-multi';
 import * as topojson from 'topojson';
-import './App.css';
 
 class App extends Component {
   async componentDidMount() {
@@ -15,7 +14,6 @@ class App extends Component {
   }
 
   drawMap = (edData, coData) => {
-    console.log(coData);
     const height = 900;
     const width = 1200;
     const margin = {
@@ -25,14 +23,14 @@ class App extends Component {
       left: 120
     };
 
-    const geojson = topojson.feature(coData, coData.objects.counties);
+    const geoJSON = topojson.feature(coData, coData.objects.counties);
 
-    const countyEdData = d => edData.filter(co => co.fips === d.id)[0];
-
-    const colorDomain = [
+    const edDataDomain = [
       d3.min(edData.map(co => co.bachelorsOrHigher)),
       d3.max(edData.map(co => co.bachelorsOrHigher))
     ];
+
+    const countyEdData = d => edData.filter(co => co.fips === d.id)[0];
 
     const colors = [
       'hsl(200, 60%, 90%)',
@@ -48,7 +46,7 @@ class App extends Component {
 
     const colorScale = d3
       .scaleQuantize()
-      .domain(colorDomain)
+      .domain(edDataDomain)
       .range(colors);
 
     const svg = d3
@@ -59,19 +57,73 @@ class App extends Component {
         width
       });
 
+    const map = svg.append('g').attrs({
+      id: 'map',
+      transform: `translate(${margin.left}, ${margin.top})`
+    });
+
+    const legend = svg.append('g').attrs({
+      id: 'legend',
+      transform: 'translate(720, 150)'
+    });
+
+    const legendScale = d3
+      .scaleLinear()
+      .domain(edDataDomain)
+      .range([0, 270]);
+
+    const legendAxis = d3
+      .axisBottom(legendScale)
+      .tickValues(d3.range(edDataDomain[0] + 8.05, edDataDomain[1] - 8.05, 8.05))
+      .tickFormat(n => `${Math.round(n)}%`)
+      .tickSizeOuter(0);
+
     const tooltip = d3
       .select('#graph')
       .append('div')
-      .attr('id', 'tooltip');
+      .attrs({
+        id: 'tooltip'
+      })
+      .styles({
+        position: 'absolute',
+        visibility: 'hidden',
+        background: 'white',
+        padding: '0.25em',
+        border: '1px solid black',
+        opacity: 0.8,
+        'text-align': 'center',
+        'white-space': 'pre-wrap',
+        'z-index': 10
+      });
 
     svg
-      .append('g')
+      .append('text')
       .attrs({
-        id: 'map',
-        transform: `translate(${margin.left}, ${margin.top})`
+        id: 'title',
+        x: width / 2,
+        y: margin.top / 2
       })
+      .styles({
+        'text-anchor': 'middle',
+        'font-size': '2em'
+      })
+      .text('United States Educational Attainment');
+
+    svg
+      .append('text')
+      .attrs({
+        id: 'description',
+        x: width / 2,
+        y: margin.top / 1.2
+      })
+      .styles({
+        'text-anchor': 'middle'
+      })
+      .text("Percentage of adults age 25 and older with a bachelor's degree or higher (2010-2014)");
+
+    map
       .selectAll('path')
-      .data(geojson.features)
+      .data(geoJSON.features)
       .enter()
       .append('path')
       .attrs({
@@ -81,28 +133,34 @@ class App extends Component {
         'data-fips': d => d.id,
         'data-education': d => countyEdData(d).bachelorsOrHigher
       })
-      .on('mouseover', d => {
+      .on('mouseover', function(d) {
         const { state, area_name: areaName, bachelorsOrHigher } = countyEdData(d);
+        d3.select(this).styles({
+          stroke: 'black',
+          'stroke-width': 0.75
+        });
         tooltip
           .text(`${areaName}, ${state}\n${bachelorsOrHigher}%`)
-          .attr('data-year', d.year)
-          .style('visibility', 'visible')
+          .attrs({
+            'data-education': bachelorsOrHigher
+          })
+          .styles({
+            visibility: 'visible'
+          })
           .style(
             'top',
-            `${d3.event.target.getBoundingClientRect().top - 60 + window.pageYOffset}px`
+            `${d3.event.target.getBoundingClientRect().top - 70 + window.pageYOffset}px`
           )
-          .style('left', `${d3.event.target.getBoundingClientRect().left - 60}px`);
+          .style('left', `${d3.event.target.getBoundingClientRect().left - 65}px`);
       })
-      .on('mouseout', () => {
+      .on('mouseout', function() {
+        d3.select(this).styles({
+          stroke: 'none'
+        });
         tooltip.style('visibility', 'hidden');
       });
 
-    svg
-      .append('g')
-      .attrs({
-        id: 'legend',
-        transform: 'translate(710, 150)'
-      })
+    legend
       .selectAll('rect')
       .data(colors)
       .enter()
@@ -114,6 +172,16 @@ class App extends Component {
         x: (d, i) => 30 * i,
         fill: d => d
       });
+
+    legend
+      .append('g')
+      .attrs({
+        id: 'legend-axis',
+        transform: 'translate(0, 15)'
+      })
+      .call(legendAxis)
+      .select('.domain')
+      .remove();
   };
 
   render() {
